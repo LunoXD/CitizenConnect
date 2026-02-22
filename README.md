@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
   # Citizen-Politician Communication App
 
@@ -9,3 +10,6 @@
 
   Run `npm run dev` to start the development server.
   
+=======
+# CitizenConnect
+>>>>>>> 6c366fd19ed2789673cd5396c7ca33e4ece1d8be
