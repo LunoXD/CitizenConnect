@@ -19,8 +19,7 @@ export function DashboardLayout({ user, onLogout, children }) {
   };
 
   const getRoleLabel = (role) => {
-    const key = role.auth.roles;
-    return t.auth.roles[key] || role;
+    return t.auth.roles[role] || role;
   };
 
   return (
@@ -39,7 +38,7 @@ export function DashboardLayout({ user, onLogout, children }) {
                 src={govLogo}
                 alt="Government of India"
                 className="h-10 w-auto object-contain"
-                onError={(e) => { (e.target).style.display = 'none'; }}
+                onError={(e) => { e.target.style.display = 'none'; }}
               />
               <div>
                 <div className="text-xl font-extrabold tracking-tight leading-tight">
