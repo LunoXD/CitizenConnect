@@ -3,44 +3,10 @@ import { Link } from 'react-router';
 import { Shield, Megaphone, Eye, ArrowRight, CheckCircle, Users, Globe, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import govLogo from '../../assets/images/government-of-india.jpg';
-import pawanImg from '../../assets/images/pawan.png';
-import yogiImg from '../../assets/images/yogi.png';
-import modiImg from '../../assets/images/modi.png';
 import indianLogoImg from '../../assets/images/indianlogo.png';
-
-const leaders = [
-  {
-    src: pawanImg,
-    name: 'Pawan Kalyan',
-    title: 'Deputy Chief Minister, Andhra Pradesh',
-    quote: 'The voice of the people is the voice of progress.',
-    accent: 'from-[#138808]/60 to-[#0a5405]/80',
-    tag: 'bg-[#138808]',
-    glow: 'rgba(19,136,8,0.35)',
-  },
-  {
-    src: yogiImg,
-    name: 'Yogi Adityanath',
-    title: 'Chief Minister, Uttar Pradesh',
-    quote: 'Governance that reaches every citizen, every village.',
-    accent: 'from-[#000080]/60 to-[#000050]/90',
-    tag: 'bg-[#000080]',
-    glow: 'rgba(0,0,128,0.45)',
-  },
-  {
-    src: modiImg,
-    name: 'Narendra Modi',
-    title: 'Prime Minister of India',
-    quote: 'Together we build a stronger, more transparent democracy.',
-    accent: 'from-[#FF9933]/60 to-[#b36800]/80',
-    tag: 'bg-[#FF9933]',
-    glow: 'rgba(255,153,51,0.35)',
-  },
-];
 
 export function LandingPage() {
   const { lang, setLang, t, languages } = useLanguage();
-  const [mouse, setMouse] = useState({ x: 50, y: 50, over: false });
   const [langOpen, setLangOpen] = useState(false);
 
   const STATS = [
@@ -64,43 +30,9 @@ export function LandingPage() {
     { Icon: Shield,    title: t.features.safe.title,        desc: t.features.safe.desc,        iconBg: 'bg-gray-100',   iconColor: 'text-gray-600'  },
   ];
 
-  const activePanel = !mouse.over
-    ? null
-    : mouse.x < 33.33
-    ? 0
-    : mouse.x < 66.67
-    ? 1
-    : 2;
-
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMouse({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-      over: true,
-    });
-  };
-
   return (
     <>
       <style>{`
-        /* ── Ken Burns ─────────────────────────── */
-        @keyframes kb0 {
-          0%   { transform: scale(1)    translate(0%,   0%);  }
-          100% { transform: scale(1.18) translate(-4%, -3%);  }
-        }
-        @keyframes kb1 {
-          0%   { transform: scale(1.14) translate(3%,  0%);   }
-          100% { transform: scale(1)    translate(-2%,  4%);  }
-        }
-        @keyframes kb2 {
-          0%   { transform: scale(1)    translate(-3%,  2%);  }
-          100% { transform: scale(1.16) translate( 2%, -3%);  }
-        }
-        .kb0 { animation: kb0 14s ease-in-out infinite alternate; }
-        .kb1 { animation: kb1 16s ease-in-out infinite alternate; }
-        .kb2 { animation: kb2 13s ease-in-out infinite alternate; }
-
         /* ── Tricolor bar ──────────────────────── */
         .tricolor-bar {
           background: linear-gradient(to right,
@@ -194,81 +126,19 @@ export function LandingPage() {
           </div>
         </nav>
 
-        {/* ── Hero: Ken Burns + Spotlight Triptych ───────────── */}
-        <div
-          className="relative flex h-screen min-h-[620px] overflow-hidden cursor-crosshair"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setMouse((m) => ({ ...m, over: false }))}
-        >
-          {leaders.map((leader, i) => {
-            const isActive = activePanel === i;
-            return (
-              <div key={leader.src} className="relative flex-1 overflow-hidden">
-                <img
-                  src={leader.src}
-                  alt={leader.name}
-                  className={`absolute inset-0 w-full h-full object-cover object-top kb${i}`}
-                />
-                <div className={`absolute inset-0 bg-gradient-to-t ${leader.accent} opacity-60`} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30" />
-
-                {i < 2 && (
-                  <div
-                    className="absolute top-0 right-0 bottom-0 w-px z-10"
-                    style={{
-                      background: `linear-gradient(to bottom, transparent, ${leader.glow.replace('0.35', '0.6')}, transparent)`,
-                    }}
-                  />
-                )}
-
-                <div className="absolute bottom-0 left-0 right-0 z-20 px-6 pb-10">
-                  <div className={`w-8 h-[3px] rounded-full ${leader.tag} mb-3`} />
-                  <p className="text-white/50 text-[10px] font-bold tracking-[0.2em] uppercase mb-1">
-                    {leader.title}
-                  </p>
-                  <h3 className="text-2xl sm:text-[1.75rem] font-extrabold text-white leading-tight tracking-tight">
-                    {leader.name}
-                  </h3>
-                  <div
-                    className="overflow-hidden transition-all duration-500 ease-in-out"
-                    style={{
-                      maxHeight: isActive ? '120px' : '0px',
-                      opacity: isActive ? 1 : 0,
-                      marginTop: isActive ? '10px' : '0',
-                    }}
-                  >
-                    <p className="text-white/75 text-sm italic leading-relaxed">
-                      &ldquo;{leader.quote}&rdquo;
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Spotlight mask */}
-          <div
-            className="absolute inset-0 z-10 pointer-events-none"
-            style={{
-              background: mouse.over
-                ? `radial-gradient(ellipse 420px 520px at ${mouse.x}% ${mouse.y}%, transparent 0%, rgba(0,0,0,0.52) 60%, rgba(0,0,0,0.82) 100%)`
-                : 'rgba(0,0,0,0.42)',
-              transition: 'background 0.04s linear',
-            }}
+        {/* ── Hero ───────────────────────────────────────────── */}
+        <div className="relative h-screen min-h-[620px] overflow-hidden">
+          {/* Hero background image */}
+          <img
+            src="https://cdn.discordapp.com/attachments/1475965708771918018/1476149638007488666/Heading.png?ex=69a012fb&is=699ec17b&hm=713e536730cdfb279bd15979417efa4e13b293429b58654939aabae999087706"
+            alt="CitizenConnect Hero"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-
-          {/* Warm cursor glare */}
-          {mouse.over && (
-            <div
-              className="absolute inset-0 z-10 pointer-events-none"
-              style={{
-                background: `radial-gradient(circle 80px at ${mouse.x}% ${mouse.y}%, rgba(255,180,80,0.12) 0%, transparent 100%)`,
-              }}
-            />
-          )}
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
 
           {/* Center headline */}
-          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4">
             <span className="inline-flex items-center gap-2 mb-5 px-5 py-2 rounded-full bg-black/40 backdrop-blur-md text-white/80 text-[10px] font-bold tracking-[0.22em] border border-white/15 uppercase">
               <span className="w-2 h-2 rounded-full bg-[#FF9933] inline-block" />
               {t.hero.badge}
@@ -290,11 +160,11 @@ export function LandingPage() {
               </span>
             </h1>
 
-            <p className="mt-5 text-white/45 text-sm tracking-wide text-center">
+            <p className="mt-5 text-white/60 text-sm tracking-wide text-center">
               {t.hero.subtitle}
             </p>
 
-            <div className="mt-9 flex gap-4 pointer-events-auto">
+            <div className="mt-9 flex gap-4">
               <Link
                 to="/signup"
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#FF9933] text-[#0d0d0d] font-bold hover:bg-[#ffaa55] shadow-2xl transition-all text-sm"
@@ -303,7 +173,7 @@ export function LandingPage() {
               </Link>
               <Link
                 to="/signin"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white/8 hover:bg-white/15 backdrop-blur-sm text-white font-semibold border border-white/20 transition-all text-sm"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-semibold border border-white/20 transition-all text-sm"
               >
                 {t.hero.signIn}
               </Link>
@@ -311,7 +181,7 @@ export function LandingPage() {
           </div>
 
           {/* Scroll hint */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1 opacity-30">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 opacity-40">
             <div className="w-px h-8 bg-[#FF9933] animate-pulse" />
             <span className="text-white/60 text-[10px] tracking-widest uppercase">{t.hero.scroll}</span>
           </div>
