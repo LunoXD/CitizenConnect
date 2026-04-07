@@ -1,13 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router';
-import { Shield, UserRound, Users, Megaphone, Sparkles, Phone, Mail, CircleCheckBig, ChevronRight, Search } from 'lucide-react';
+import { Shield, UserRound, Users, Megaphone, Sparkles, Phone, Mail, CircleCheckBig, ChevronRight, Search, SearchX, CheckCircle2, XCircle, Copy } from 'lucide-react';
 
 import { DashboardLayout } from '../components/dashboards/DashboardLayout';
+import { SectionHeader } from '../components/common/SectionHeader';
 import { useAuth } from '../context/AuthContext';
 
 export function DashboardHome() {
   const { user, logout } = useAuth();
   const [panelQuery, setPanelQuery] = useState('');
+  const [toast, setToast] = useState(null);
 
   if (!user) {
     return <Navigate to="/signin" replace />;
@@ -77,8 +79,45 @@ export function DashboardHome() {
     { label: 'Account Status', value: user.status || 'active' },
   ];
 
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 2200);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message, id: Date.now() });
+  };
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(user.email);
+      showToast('success', 'Email copied to clipboard');
+    } catch {
+      showToast('error', 'Unable to copy email');
+    }
+  };
+
+  const resetSearch = () => {
+    setPanelQuery('');
+    showToast('success', 'Panel search reset');
+  };
+
   return (
     <DashboardLayout user={user} onLogout={logout}>
+      {toast && (
+        <div className="fixed top-20 right-4 z-50">
+          <div className={`min-w-[220px] max-w-sm rounded-xl border px-4 py-3 shadow-lg text-sm font-medium flex items-center gap-2 ${
+            toast.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : 'bg-red-50 border-red-200 text-red-800'
+          }`}>
+            {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            {toast.message}
+          </div>
+        </div>
+      )}
+
       <div className="mb-6 md:mb-8 rounded-3xl border border-orange-100 bg-[radial-gradient(circle_at_0%_0%,#fff7ed_0%,#ffffff_42%,#f8fafc_100%)] p-4 sm:p-5 md:p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 md:gap-6">
           <div>
@@ -99,6 +138,14 @@ export function DashboardHome() {
               <div className="flex items-center gap-2 text-gray-700"><Mail className="w-4 h-4 text-gray-400" /> {user.email}</div>
               <div className="flex items-center gap-2 text-gray-700"><Phone className="w-4 h-4 text-gray-400" /> {user.phoneNumber || 'Not added'}</div>
             </div>
+            <button
+              type="button"
+              onClick={copyEmail}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:border-[#FF9933] hover:text-[#FF9933] transition"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy Email
+            </button>
           </div>
         </div>
       </div>
@@ -112,19 +159,33 @@ export function DashboardHome() {
         ))}
       </div>
 
-      <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <h2 className="text-xl font-bold text-gray-900">Your Panels</h2>
-        <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={panelQuery}
-            onChange={(e) => setPanelQuery(e.target.value)}
-            placeholder="Search panel by name or route"
-            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF9933]/30 focus:border-[#FF9933]"
-          />
-        </div>
-      </div>
+      <SectionHeader
+        title="Your Panels"
+        subtitle="Choose where you want to work"
+        actions={(
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 md:w-80">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={panelQuery}
+                onChange={(e) => setPanelQuery(e.target.value)}
+                placeholder="Search panel by name or route"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF9933]/30 focus:border-[#FF9933]"
+              />
+            </div>
+            {panelQuery && (
+              <button
+                type="button"
+                onClick={resetSearch}
+                className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-700 hover:border-[#FF9933] hover:text-[#FF9933] transition"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        )}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {filteredLinks.map((item) => {
@@ -148,8 +209,12 @@ export function DashboardHome() {
         })}
 
         {filteredLinks.length === 0 && (
-          <div className="col-span-full rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center text-sm text-gray-500">
-            No panel matches "{panelQuery}".
+          <div className="col-span-full rounded-2xl border border-dashed border-gray-200 bg-white p-10 text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center mb-3">
+              <SearchX className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-semibold text-gray-700">No panel found</p>
+            <p className="text-sm text-gray-500 mt-1">No panel matches "{panelQuery}". Try a different keyword.</p>
           </div>
         )}
       </div>
