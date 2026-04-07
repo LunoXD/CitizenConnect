@@ -1,5 +1,18 @@
 package com.citizenconnect.backend.controller;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.citizenconnect.backend.dto.auth.AuthResponse;
 import com.citizenconnect.backend.dto.auth.CompleteOnboardingRequest;
 import com.citizenconnect.backend.dto.auth.GoogleAuthRequest;
@@ -10,17 +23,9 @@ import com.citizenconnect.backend.entity.Role;
 import com.citizenconnect.backend.entity.UserStatus;
 import com.citizenconnect.backend.repository.UserRepository;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
