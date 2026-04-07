@@ -67,6 +67,78 @@ const t = {
       back: '← Back to home',
       roles: { citizen: 'Citizen', politician: 'Politician', moderator: 'Moderator', admin: 'Admin' },
     },
+    dashboard: {
+      welcome: 'Welcome',
+      hubBadge: 'Unified Dashboard Hub',
+      hubSubtitle: 'Start from one place, then jump to the right workspace for your responsibilities.',
+      profileSnapshot: 'Profile Snapshot',
+      profileCompleteness: 'Profile completeness',
+      contactVerified: 'Contact Verified',
+      contactUnverified: 'Contact Unverified',
+      copyEmail: 'Copy Email',
+      emailCopied: 'Email copied to clipboard',
+      emailCopyFailed: 'Unable to copy email',
+      quickActions: 'Quick Actions',
+      refreshHub: 'Refresh Hub',
+      openPrimaryPanel: 'Open Primary Panel',
+      editProfile: 'Edit Profile',
+      compactMode: 'Compact Mode',
+      normalSpacing: 'Normal Spacing',
+      highContrast: 'High Contrast',
+      normalContrast: 'Normal Contrast',
+      securityTip: 'Use Google sign-in only on trusted devices. Avoid sharing OTPs or session cookies.',
+      roleLegend: 'Role Legend',
+      shortcuts: 'Shortcuts',
+      yourPanels: 'Your Panels',
+      chooseWorkspace: 'Choose where you want to work',
+      searchPlaceholder: 'Search panel by name or route',
+      reset: 'Reset',
+      panelSearchReset: 'Panel search reset',
+      noPanelFound: 'No panel found',
+      noPanelMatches: 'No panel matches',
+      openPanel: 'Open Panel',
+      roleAdministrator: 'Administrator',
+      roleModerator: 'Moderator',
+      rolePolitician: 'Politician',
+      roleCitizen: 'Citizen',
+      statPanels: 'Panels Available',
+      statRole: 'Current Role',
+      statOnboarding: 'Onboarding',
+      statAccount: 'Account Status',
+      complete: 'Complete',
+      pending: 'Pending',
+      firstSession: 'First session',
+      quickOpenUserManagement: 'Open User Management',
+      quickOpenModerationQueue: 'Open Moderation Queue',
+      quickCreateAnnouncement: 'Create Announcement',
+      quickComplaintEntry: 'Quick Complaint Entry',
+      panelCitizenLabel: 'Citizen Panel',
+      panelCitizenHint: 'Report civic issues and track complaint progress',
+      panelModeratorLabel: 'Moderator Panel',
+      panelModeratorHint: 'Review and resolve queue items quickly',
+      panelPoliticianLabel: 'Politician Panel',
+      panelPoliticianHint: 'Publish updates and respond to public feedback',
+      panelAdminLabel: 'Admin Panel',
+      panelAdminHint: 'Manage users, roles, and platform controls',
+      offlineWarning: 'You are offline. Some dashboard actions may fail until your connection is restored.',
+      profileUpdated: 'Profile updated successfully',
+      compactEnabled: 'Compact mode enabled',
+      compactDisabled: 'Compact mode disabled',
+      contrastEnabled: 'High contrast enabled',
+      contrastDisabled: 'High contrast disabled',
+      profileNameShort: 'Full name should be at least 3 characters.',
+      profilePhoneInvalid: 'Phone number format is invalid. Use 7-20 digits/chars.',
+      notAdded: 'Not added',
+      modalEditProfile: 'Edit Profile',
+      modalNamePlaceholder: 'Full name',
+      modalPhonePlaceholder: 'Phone number',
+      cancel: 'Cancel',
+      save: 'Save',
+      logout: 'Logout',
+      openNotifications: 'Open notifications',
+      openSettings: 'Open settings',
+      topControls: 'Dashboard top controls',
+    },
   },
 
   HI: {
@@ -134,6 +206,18 @@ const t = {
       debugSkip: '⚡ डीबग छोड़ें',
       back: '← होम पर वापस',
       roles: { citizen: 'नागरिक', politician: 'राजनेता', moderator: 'मध्यस्थ', admin: 'प्रशासक' },
+    },
+    dashboard: {
+      welcome: 'स्वागत है',
+      hubBadge: 'यूनिफाइड डैशबोर्ड हब',
+      yourPanels: 'आपके पैनल',
+      chooseWorkspace: 'जहां काम करना है वह चुनें',
+      quickActions: 'त्वरित क्रियाएं',
+      shortcuts: 'शॉर्टकट',
+      roleLegend: 'भूमिका सूची',
+      copyEmail: 'ईमेल कॉपी करें',
+      reset: 'रीसेट',
+      openPanel: 'पैनल खोलें',
     },
   },
 
@@ -696,5 +780,25 @@ export const LANGUAGES = [
 ];
 
 export function getT(lang) {
-  return t[lang] ?? t.EN;
+  const selected = t[lang] ?? {};
+
+  const mergeDeep = (base, override) => {
+    if (!override || typeof override !== 'object') return base;
+    const result = { ...base };
+    for (const key of Object.keys(override)) {
+      const baseValue = result[key];
+      const overrideValue = override[key];
+      if (
+        baseValue && typeof baseValue === 'object' && !Array.isArray(baseValue) &&
+        overrideValue && typeof overrideValue === 'object' && !Array.isArray(overrideValue)
+      ) {
+        result[key] = mergeDeep(baseValue, overrideValue);
+      } else {
+        result[key] = overrideValue;
+      }
+    }
+    return result;
+  };
+
+  return mergeDeep(t.EN, selected);
 }

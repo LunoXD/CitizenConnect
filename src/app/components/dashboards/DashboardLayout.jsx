@@ -6,6 +6,7 @@ import govLogo from '../../../assets/images/government-of-india.jpg';
 
 export function DashboardLayout({ user, onLogout, children }) {
   const { lang, setLang, t, languages } = useLanguage();
+  const d = t.dashboard;
   const [langOpen, setLangOpen] = useState(false);
 
   const getRoleBadgeStyle = (role) => {
@@ -56,8 +57,8 @@ export function DashboardLayout({ user, onLogout, children }) {
               />
               <div>
                 <div className="text-xl font-extrabold tracking-tight leading-tight">
-                  <span style={{ color: '#FF9933' }}>Citizen</span>
-                  <span style={{ color: '#138808' }}>Connect</span>
+                  <span style={{ color: '#FF9933' }}>Bharat</span>
+                  <span style={{ color: '#138808' }}>Link</span>
                 </div>
                 <div className="text-[10px] font-medium tracking-widest uppercase leading-none" style={{ color: '#000080' }}>
                   {t.nav.tagline}
@@ -66,7 +67,7 @@ export function DashboardLayout({ user, onLogout, children }) {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-2" role="navigation" aria-label="Dashboard top controls">
+            <div className="flex items-center gap-2" role="navigation" aria-label={d.topControls}>
 
               {/* Language selector */}
               <div className="relative">
@@ -99,13 +100,13 @@ export function DashboardLayout({ user, onLogout, children }) {
               </div>
 
               {/* Notifications */}
-              <button aria-label="Open notifications" className="p-2 rounded-lg text-gray-500 hover:text-[#FF9933] hover:bg-orange-50 transition-colors relative">
+              <button aria-label={d.openNotifications} className="p-2 rounded-lg text-gray-500 hover:text-[#FF9933] hover:bg-orange-50 transition-colors relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
               </button>
 
               {/* Settings */}
-              <button aria-label="Open settings" className="p-2 rounded-lg text-gray-500 hover:text-[#FF9933] hover:bg-orange-50 transition-colors">
+              <button aria-label={d.openSettings} className="p-2 rounded-lg text-gray-500 hover:text-[#FF9933] hover:bg-orange-50 transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
 
@@ -131,7 +132,7 @@ export function DashboardLayout({ user, onLogout, children }) {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors ml-1"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:block">Logout</span>
+                <span className="hidden sm:block">{d.logout}</span>
               </button>
             </div>
           </div>
