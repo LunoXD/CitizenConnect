@@ -45,9 +45,9 @@ public class AuthController {
                 .name(request.name())
                 .email(request.email())
                 .password(request.password())
-            .role(resolveRoleByEmail(request.email()))
+                .role(resolveRoleByEmail(request.email()))
                 .status(UserStatus.ACTIVE)
-            .onboardingCompleted(false)
+                .onboardingCompleted(false)
                 .createdAt(LocalDateTime.now())
                 .build());
 
@@ -127,6 +127,7 @@ public class AuthController {
         }
 
         user.setName(request.name().trim());
+        user.setPhoneNumber(request.phoneNumber().trim());
         user.setOnboardingCompleted(true);
 
         return toAuthResponse(userRepository.save(user));
@@ -159,6 +160,7 @@ public class AuthController {
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
+                user.getPhoneNumber(),
                 fromRole(user.getRole()),
                 user.getStatus().name().toLowerCase(),
                 user.isOnboardingCompleted()

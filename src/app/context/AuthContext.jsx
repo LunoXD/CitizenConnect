@@ -44,8 +44,8 @@ export function AuthProvider({ children }) {
   };
 
   const completeOnboarding = async (data) => {
-    if (!data?.email || !data?.name || !data?.role) {
-      throw new Error('Email, name, and role are required.');
+    if (!data?.email || !data?.name || !data?.phoneNumber) {
+      throw new Error('Email, name, and phone number are required.');
     }
     const newUser = await api.auth.completeOnboarding(data);
     setUser(newUser);

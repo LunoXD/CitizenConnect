@@ -19,7 +19,7 @@ export function SignInPage() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
 
-  const destinationForUser = (authUser) => (authUser?.onboardingCompleted === false ? '/onboarding' : `/${authUser.role}`);
+  const destinationForUser = (authUser) => (authUser?.onboardingCompleted === false ? '/onboarding' : '/dashboard');
 
   const handleSubmit = async (e) => {
     e.preventDefault();

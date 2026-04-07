@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router';
-import { User, AlertCircle } from 'lucide-react';
+import { User, Phone, AlertCircle } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -11,6 +11,7 @@ export function OnboardingPage() {
   const { t } = useLanguage();
 
   const [name, setName] = useState(user?.name || '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,7 +20,7 @@ export function OnboardingPage() {
   }
 
   if (user.onboardingCompleted !== false) {
-    return <Navigate to={`/${user.role}`} replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -31,13 +32,19 @@ export function OnboardingPage() {
       return;
     }
 
+    if (!phoneNumber.trim()) {
+      setError('Please enter your phone number.');
+      return;
+    }
+
     setLoading(true);
     try {
       const updatedUser = await completeOnboarding({
         email: user.email,
         name: name.trim(),
+        phoneNumber: phoneNumber.trim(),
       });
-      navigate(`/${updatedUser.role}`, { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to complete onboarding.');
     } finally {
@@ -68,6 +75,17 @@ export function OnboardingPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t.auth.namePh}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF9933]/30 focus:border-[#FF9933] transition"
+            />
+          </div>
+
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Phone number"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF9933]/30 focus:border-[#FF9933] transition"
             />
           </div>

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { LandingPage } from './pages/LandingPage';
+import { DashboardHome } from './pages/DashboardHome';
 import { SignInPage } from './pages/auth/SignInPage';
 import { SignUpPage } from './pages/auth/SignUpPage';
 import { OnboardingPage } from './pages/auth/OnboardingPage';
@@ -12,7 +13,7 @@ import { ModeratorDashboard } from './components/dashboards/ModeratorDashboard';
 
 function AppRoutes() {
   const { user, logout } = useAuth();
-  const homeRoute = user?.onboardingCompleted === false ? '/onboarding' : `/${user?.role}`;
+  const homeRoute = user?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
 
   return (
     <Routes>
@@ -32,6 +33,10 @@ function AppRoutes() {
       <Route
         path="/onboarding"
         element={user ? <OnboardingPage /> : <Navigate to="/signin" replace />}
+      />
+      <Route
+        path="/dashboard"
+        element={user ? <DashboardHome /> : <Navigate to="/signin" replace />}
       />
 
       {/* Protected dashboard routes */}
@@ -67,6 +72,10 @@ function AppRoutes() {
       />
       <Route
         path="/politicion"
+        element={<Navigate to="/politician" replace />}
+      />
+      <Route
+        path="/poicitfrn"
         element={<Navigate to="/politician" replace />}
       />
       <Route
