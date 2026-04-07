@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { DashboardLayout } from './DashboardLayout';
 import { Users, Shield, Activity, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
@@ -7,6 +8,8 @@ import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function AdminDashboard({ user, onLogout }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState([]);
   const [issues, setIssues] = useState([]);
@@ -30,6 +33,16 @@ export function AdminDashboard({ user, onLogout }) {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('quick') !== 'users') return;
+
+    setActiveTab('users');
+    params.delete('quick');
+    const search = params.toString();
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   const stats = useMemo(() => [
     { label: 'Total Users', value: String(users.length), icon: Users, color: 'bg-blue-500' },

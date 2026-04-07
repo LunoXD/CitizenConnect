@@ -86,6 +86,23 @@ export function DashboardHome() {
     { label: 'Account Status', value: user.status || 'active' },
   ];
 
+  const profileSignals = [
+    Boolean(user.name && user.name.trim().length >= 3),
+    Boolean(user.email && user.email.includes('@')),
+    Boolean(user.phoneNumber && user.phoneNumber.trim().length >= 7),
+    Boolean(user.onboardingCompleted),
+  ];
+  const profileCompletionPercent = Math.round((profileSignals.filter(Boolean).length / profileSignals.length) * 100);
+  const contactVerified = Boolean(user.email && user.email.includes('@') && user.phoneNumber && user.phoneNumber.trim().length >= 7);
+
+  const roleQuickEntry = user.role === 'admin'
+    ? { to: '/admin?quick=users', label: 'Open User Management' }
+    : user.role === 'moderator'
+      ? { to: '/moderator?quick=queue', label: 'Open Moderation Queue' }
+      : user.role === 'politician'
+        ? { to: '/politician?quick=announcement', label: 'Create Announcement' }
+        : { to: '/citizen?quick=complaint', label: 'Quick Complaint Entry' };
+
   const lastLoginDisplay = user.lastLoginAt
     ? new Date(user.lastLoginAt).toLocaleString()
     : 'First session';
@@ -268,6 +285,20 @@ export function DashboardHome() {
               <div className="flex items-center gap-2 text-gray-700"><Mail className="w-4 h-4 text-gray-400" /> {user.email}</div>
               <div className="flex items-center gap-2 text-gray-700"><Phone className="w-4 h-4 text-gray-400" /> {user.phoneNumber || 'Not added'}</div>
               <div className="flex items-center gap-2 text-gray-700"><Clock3 className="w-4 h-4 text-gray-400" /> {lastLoginDisplay}</div>
+              <div className="pt-2">
+                <div className="flex items-center justify-between text-xs text-gray-600 mb-1.5">
+                  <span className="font-semibold">Profile completeness</span>
+                  <span>{profileCompletionPercent}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-gray-200 overflow-hidden">
+                  <div className="h-full bg-[#FF9933] transition-all" style={{ width: `${profileCompletionPercent}%` }} />
+                </div>
+              </div>
+              <div>
+                <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${contactVerified ? 'border-green-200 bg-green-50 text-green-700' : 'border-amber-200 bg-amber-50 text-amber-700'}`}>
+                  {contactVerified ? 'Contact Verified' : 'Contact Unverified'}
+                </span>
+              </div>
             </div>
             <button
               type="button"
@@ -292,6 +323,9 @@ export function DashboardHome() {
               Open Primary Panel
             </Link>
           )}
+          <Link to={roleQuickEntry.to} className={`${buttonBase} bg-[#138808] text-white hover:bg-[#0f6506]`}>
+            {roleQuickEntry.label}
+          </Link>
           <button
             type="button"
             onClick={copyEmail}

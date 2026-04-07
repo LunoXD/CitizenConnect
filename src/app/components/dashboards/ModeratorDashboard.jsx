@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { DashboardLayout } from './DashboardLayout';
 import { Flag, CheckCircle, XCircle, Eye, AlertTriangle } from 'lucide-react';
@@ -6,6 +7,8 @@ import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function ModeratorDashboard({ user, onLogout }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('flagged');
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +30,16 @@ export function ModeratorDashboard({ user, onLogout }) {
   useEffect(() => {
     loadIssues();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('quick') !== 'queue') return;
+
+    setActiveTab('flagged');
+    params.delete('quick');
+    const search = params.toString();
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   const moderationQueue = useMemo(
     () => issues.filter((issue) => issue.status !== 'resolved'),

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { DashboardLayout } from './DashboardLayout';
 import { Plus, MessageSquare, CheckCircle, Clock, AlertTriangle, Megaphone } from 'lucide-react';
@@ -8,6 +9,8 @@ import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function CitizenDashboard({ user, onLogout }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('my-issues');
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -58,6 +61,17 @@ export function CitizenDashboard({ user, onLogout }) {
   useEffect(() => {
     loadData();
   }, [user.email]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('quick') !== 'complaint') return;
+
+    setActiveTab('my-issues');
+    setShowIssueModal(true);
+    params.delete('quick');
+    const search = params.toString();
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   const handleIssueSubmit = async (issueData) => {
     setSubmittingIssue(true);

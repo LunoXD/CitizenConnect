@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 import { DashboardLayout } from './DashboardLayout';
 import { AlertTriangle, MessageSquare, Send, Megaphone, TrendingUp, Users } from 'lucide-react';
@@ -7,6 +8,8 @@ import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function PoliticianDashboard({ user, onLogout }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('issues');
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState(null);
@@ -66,6 +69,17 @@ export function PoliticianDashboard({ user, onLogout }) {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('quick') !== 'announcement') return;
+
+    setActiveTab('announcements');
+    setShowAnnouncementModal(true);
+    params.delete('quick');
+    const search = params.toString();
+    navigate({ pathname: location.pathname, search: search ? `?${search}` : '' }, { replace: true });
+  }, [location.pathname, location.search, navigate]);
 
   const handleStatusChange = async (issueId, newStatus) => {
     try {
