@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
     const newUser = await api.auth.login({ email, password, role });
     setUser(newUser);
     localStorage.setItem('cc_user', JSON.stringify(newUser));
+    return newUser;
   };
 
   const register = async (data) => {
@@ -29,15 +30,28 @@ export function AuthProvider({ children }) {
     const newUser = await api.auth.register(data);
     setUser(newUser);
     localStorage.setItem('cc_user', JSON.stringify(newUser));
+    return newUser;
   };
 
   const googleSignIn = async (idToken, role) => {
-    if (!idToken || !role) {
-      throw new Error('Google token and role are required.');
+    if (!idToken) {
+      throw new Error('Google token is required.');
     }
-    const newUser = await api.auth.google({ idToken, role });
+    const body = role ? { idToken, role } : { idToken };
+    const newUser = await api.auth.google(body);
     setUser(newUser);
     localStorage.setItem('cc_user', JSON.stringify(newUser));
+    return newUser;
+  };
+
+  const completeOnboarding = async (data) => {
+    if (!data?.email || !data?.name || !data?.role) {
+      throw new Error('Email, name, and role are required.');
+    }
+    const newUser = await api.auth.completeOnboarding(data);
+    setUser(newUser);
+    localStorage.setItem('cc_user', JSON.stringify(newUser));
+    return newUser;
   };
 
   const logout = () => {
@@ -46,7 +60,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, googleSignIn, logout }}>
+    <AuthContext.Provider value={{ user, login, register, googleSignIn, completeOnboarding, logout }}>
       {children}
     </AuthContext.Provider>
   );

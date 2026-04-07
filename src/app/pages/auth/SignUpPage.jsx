@@ -32,6 +32,8 @@ export function SignUpPage() {
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState('');
 
+  const destinationForUser = (authUser) => (authUser?.onboardingCompleted === false ? '/onboarding' : `/${authUser.role}`);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -42,8 +44,8 @@ export function SignUpPage() {
     setLoading(true);
     try {
       const data = { name, email, password, role: selectedRole };
-      await register(data);
-      navigate(`/${selectedRole}`, { replace: true });
+      const authUser = await register(data);
+      navigate(destinationForUser(authUser), { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
@@ -53,14 +55,10 @@ export function SignUpPage() {
 
   const handleGoogleCredential = async (credential) => {
     setError('');
-    if (!selectedRole) {
-      setError(t.auth.roleError);
-      return;
-    }
     setLoading(true);
     try {
-      await googleSignIn(credential, selectedRole);
-      navigate(`/${selectedRole}`, { replace: true });
+      const authUser = await googleSignIn(credential);
+      navigate(destinationForUser(authUser), { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google Sign-In failed.');
     } finally {

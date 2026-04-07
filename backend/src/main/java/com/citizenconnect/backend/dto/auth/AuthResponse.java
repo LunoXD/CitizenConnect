@@ -5,6 +5,7 @@ public record AuthResponse(
         String name,
         String email,
         String role,
-        String status
+        String status,
+        boolean onboardingCompleted
 ) {
 }

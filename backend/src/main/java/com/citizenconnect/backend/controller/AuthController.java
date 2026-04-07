@@ -1,6 +1,7 @@
 package com.citizenconnect.backend.controller;
 
 import com.citizenconnect.backend.dto.auth.AuthResponse;
+import com.citizenconnect.backend.dto.auth.CompleteOnboardingRequest;
 import com.citizenconnect.backend.dto.auth.GoogleAuthRequest;
 import com.citizenconnect.backend.dto.auth.LoginRequest;
 import com.citizenconnect.backend.dto.auth.RegisterRequest;
@@ -43,6 +44,7 @@ public class AuthController {
                 .password(request.password())
                 .role(toRole(request.role()))
                 .status(UserStatus.ACTIVE)
+            .onboardingCompleted(false)
                 .createdAt(LocalDateTime.now())
                 .build());
 
@@ -82,13 +84,9 @@ public class AuthController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Google email is not verified.");
         }
 
-        Role requestedRole = toRole(request.role());
+        Role requestedRole = toRoleOrDefault(request.role());
         AppUser user = userRepository.findByEmailIgnoreCase(tokenInfo.email())
                 .map(existing -> {
-                    if (existing.getRole() != requestedRole) {
-                        throw new ResponseStatusException(HttpStatus.CONFLICT,
-                                "This email is already registered with a different role.");
-                    }
                     if (existing.getStatus() == UserStatus.SUSPENDED) {
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is suspended.");
                     }
@@ -100,10 +98,27 @@ public class AuthController {
                         .password("GOOGLE_AUTH_" + UUID.randomUUID())
                         .role(requestedRole)
                         .status(UserStatus.ACTIVE)
+                        .onboardingCompleted(false)
                         .createdAt(LocalDateTime.now())
                         .build()));
 
         return toAuthResponse(user);
+    }
+
+    @PostMapping("/onboarding")
+    public AuthResponse completeOnboarding(@Valid @RequestBody CompleteOnboardingRequest request) {
+        AppUser user = userRepository.findByEmailIgnoreCase(request.email())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
+
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is suspended.");
+        }
+
+        user.setName(request.name().trim());
+        user.setRole(toRole(request.role()));
+        user.setOnboardingCompleted(true);
+
+        return toAuthResponse(userRepository.save(user));
     }
 
     private GoogleTokenInfo verifyGoogleToken(String idToken) {
@@ -134,8 +149,16 @@ public class AuthController {
                 user.getName(),
                 user.getEmail(),
                 fromRole(user.getRole()),
-                user.getStatus().name().toLowerCase()
+                user.getStatus().name().toLowerCase(),
+                user.isOnboardingCompleted()
         );
+    }
+
+    private Role toRoleOrDefault(String role) {
+        if (role == null || role.isBlank()) {
+            return Role.CITIZEN;
+        }
+        return toRole(role);
     }
 
     private Role toRole(String role) {

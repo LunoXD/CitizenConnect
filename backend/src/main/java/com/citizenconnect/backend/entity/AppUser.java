@@ -38,5 +38,8 @@ public class AppUser {
     private UserStatus status;
 
     @Column(nullable = false)
+    private boolean onboardingCompleted;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 }
