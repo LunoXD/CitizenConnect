@@ -4,6 +4,7 @@ import { DashboardLayout } from './DashboardLayout';
 import { Plus, MessageSquare, CheckCircle, Clock, AlertTriangle, Megaphone } from 'lucide-react';
 import { IssueReportModal } from '../modals/IssueReportModal';
 import { FeedbackModal } from '../modals/FeedbackModal';
+import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function CitizenDashboard({ user, onLogout }) {
@@ -17,6 +18,23 @@ export function CitizenDashboard({ user, onLogout }) {
 
   const [issues, setIssues] = useState([]);
   const [updates, setUpdates] = useState([]);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [myIssues, announcements] = await Promise.all([
+        api.issues.mine(user.email),
+        api.announcements.all(),
+      ]);
+      setIssues(myIssues.map(formatIssue));
+      setUpdates(announcements.map(formatAnnouncement));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatIssue = (issue) => ({
     id: String(issue.id),
@@ -38,23 +56,6 @@ export function CitizenDashboard({ user, onLogout }) {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const [myIssues, announcements] = await Promise.all([
-          api.issues.mine(user.email),
-          api.announcements.all(),
-        ]);
-        setIssues(myIssues.map(formatIssue));
-        setUpdates(announcements.map(formatAnnouncement));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, [user.email]);
 
@@ -159,8 +160,9 @@ export function CitizenDashboard({ user, onLogout }) {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button onClick={loadData} className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 text-red-800 font-semibold text-xs">Retry</button>
         </div>
       )}
 
@@ -192,7 +194,7 @@ export function CitizenDashboard({ user, onLogout }) {
       {activeTab === 'my-issues' && (
         <div className="space-y-4">
           {loading && (
-            <div className="bg-white rounded-lg shadow p-6 text-gray-600">Loading your issues...</div>
+            <LoadingSkeleton lines={4} className="text-gray-600" />
           )}
           {!loading && issues.length === 0 && (
             <div className="bg-white rounded-lg shadow p-6 text-gray-600">No issues yet. Report your first issue.</div>
@@ -238,7 +240,7 @@ export function CitizenDashboard({ user, onLogout }) {
       {activeTab === 'updates' && (
         <div className="space-y-6">
           {loading && (
-            <div className="bg-white rounded-lg shadow p-6 text-gray-600">Loading announcements...</div>
+            <LoadingSkeleton lines={4} className="text-gray-600" />
           )}
           {!loading && updates.length === 0 && (
             <div className="bg-white rounded-lg shadow p-6 text-gray-600">No announcements available yet.</div>

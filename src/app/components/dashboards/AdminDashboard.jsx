@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { DashboardLayout } from './DashboardLayout';
 import { Users, Shield, Activity, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function AdminDashboard({ user, onLogout }) {
@@ -150,8 +151,13 @@ export function AdminDashboard({ user, onLogout }) {
       {/* Overview Tab */}
       {activeTab === 'overview' && (
         <div className="space-y-8">
-          {loading && <div className="bg-white rounded-lg shadow p-4 text-sm text-gray-500">Loading dashboard data...</div>}
-          {error && <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">{error}</div>}
+          {loading && <LoadingSkeleton lines={4} className="text-sm text-gray-500" />}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700 flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button onClick={loadData} className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 text-red-800 font-semibold text-xs">Retry</button>
+            </div>
+          )}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

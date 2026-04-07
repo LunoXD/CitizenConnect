@@ -8,8 +8,11 @@ import { useAuth } from '../context/AuthContext';
 
 export function DashboardHome() {
   const { user, logout } = useAuth();
-  const [panelQuery, setPanelQuery] = useState('');
+  const [panelQuery, setPanelQuery] = useState(() => localStorage.getItem('cc_dashboard_panel_query') || '');
   const [toast, setToast] = useState(null);
+  const [compactMode, setCompactMode] = useState(() => localStorage.getItem('cc_dashboard_compact') === '1');
+  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('cc_dashboard_contrast') === '1');
+  const [isOffline, setIsOffline] = useState(() => typeof navigator !== 'undefined' && navigator.onLine === false);
 
   if (!user) {
     return <Navigate to="/signin" replace />;
@@ -98,6 +101,29 @@ export function DashboardHome() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  useEffect(() => {
+    localStorage.setItem('cc_dashboard_panel_query', panelQuery);
+  }, [panelQuery]);
+
+  useEffect(() => {
+    localStorage.setItem('cc_dashboard_compact', compactMode ? '1' : '0');
+  }, [compactMode]);
+
+  useEffect(() => {
+    localStorage.setItem('cc_dashboard_contrast', highContrast ? '1' : '0');
+  }, [highContrast]);
+
+  useEffect(() => {
+    const onOnline = () => setIsOffline(false);
+    const onOffline = () => setIsOffline(true);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+
   const showToast = (type, message) => {
     setToast({ type, message, id: Date.now() });
   };
@@ -116,8 +142,25 @@ export function DashboardHome() {
     showToast('success', 'Panel search reset');
   };
 
+  const toggleCompactMode = () => {
+    setCompactMode((prev) => {
+      const next = !prev;
+      showToast('success', next ? 'Compact mode enabled' : 'Compact mode disabled');
+      return next;
+    });
+  };
+
+  const toggleHighContrast = () => {
+    setHighContrast((prev) => {
+      const next = !prev;
+      showToast('success', next ? 'High contrast enabled' : 'High contrast disabled');
+      return next;
+    });
+  };
+
   return (
     <DashboardLayout user={user} onLogout={logout}>
+      <div className={`${highContrast ? 'contrast-125 saturate-50' : ''} ${compactMode ? 'space-y-4' : 'space-y-6'}`}>
       {toast && (
         <div className="fixed top-20 right-4 z-50">
           <div className={`min-w-[220px] max-w-sm rounded-xl border px-4 py-3 shadow-lg text-sm font-medium flex items-center gap-2 ${
@@ -128,6 +171,12 @@ export function DashboardHome() {
             {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             {toast.message}
           </div>
+        </div>
+      )}
+
+      {isOffline && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 px-4 py-3 text-sm font-medium">
+          You are offline. Some dashboard actions may fail until your connection is restored.
         </div>
       )}
 
@@ -181,6 +230,20 @@ export function DashboardHome() {
             className={`${buttonBase} border border-gray-200 text-gray-700 hover:border-[#FF9933] hover:text-[#FF9933]`}
           >
             <Copy className="w-3.5 h-3.5" /> Copy Email
+          </button>
+          <button
+            type="button"
+            onClick={toggleCompactMode}
+            className={`${buttonBase} border border-gray-200 text-gray-700 hover:border-[#FF9933] hover:text-[#FF9933]`}
+          >
+            {compactMode ? 'Normal Spacing' : 'Compact Mode'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleHighContrast}
+            className={`${buttonBase} border border-gray-200 text-gray-700 hover:border-[#FF9933] hover:text-[#FF9933]`}
+          >
+            {highContrast ? 'Normal Contrast' : 'High Contrast'}
           </button>
         </div>
       </div>
@@ -279,6 +342,7 @@ export function DashboardHome() {
             <p className="text-sm text-gray-500 mt-1">No panel matches "{panelQuery}". Try a different keyword.</p>
           </div>
         )}
+      </div>
       </div>
     </DashboardLayout>
   );

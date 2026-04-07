@@ -14,59 +14,73 @@ import { ModeratorDashboard } from './components/dashboards/ModeratorDashboard';
 function AppRoutes() {
   const { user, logout } = useAuth();
   const homeRoute = user?.onboardingCompleted === false ? '/onboarding' : '/dashboard';
+  const isAuthenticated = Boolean(user);
+  const isSuspended = String(user?.status || '').toLowerCase() === 'suspended';
+
+  const canAccessRole = (role) => {
+    if (!user || isSuspended || user.onboardingCompleted === false) return false;
+    return user.role === role;
+  };
+
+  const guardRedirect = () => {
+    if (!user) return '/signin';
+    if (isSuspended) return '/signin';
+    if (user.onboardingCompleted === false) return '/onboarding';
+    return '/dashboard';
+  };
 
   return (
     <Routes>
       {/* Public routes */}
       <Route
         path="/"
-        element={user ? <Navigate to={homeRoute} replace /> : <LandingPage />}
+        element={isAuthenticated ? <Navigate to={homeRoute} replace /> : <LandingPage />}
       />
       <Route
         path="/signin"
-        element={user ? <Navigate to={homeRoute} replace /> : <SignInPage />}
+        element={isAuthenticated && !isSuspended ? <Navigate to={homeRoute} replace /> : <SignInPage />}
       />
       <Route
         path="/signup"
-        element={user ? <Navigate to={homeRoute} replace /> : <SignUpPage />}
+        element={isAuthenticated && !isSuspended ? <Navigate to={homeRoute} replace /> : <SignUpPage />}
       />
       <Route
         path="/onboarding"
-        element={user ? <OnboardingPage /> : <Navigate to="/signin" replace />}
+        element={isAuthenticated && !isSuspended ? <OnboardingPage /> : <Navigate to="/signin" replace />}
       />
       <Route
         path="/dashboard"
-        element={user ? <DashboardHome /> : <Navigate to="/signin" replace />}
+        element={isAuthenticated && !isSuspended ? <DashboardHome /> : <Navigate to="/signin" replace />}
       />
 
       {/* Protected dashboard routes */}
       <Route
         path="/admin"
         element={
-          user?.role === 'admin' && user?.onboardingCompleted !== false ? (
+          canAccessRole('admin') ? (
             <AdminDashboard user={user} onLogout={logout} />
           ) : (
-            <Navigate to={user ? '/onboarding' : '/signin'} replace />
+            <Navigate to={guardRedirect()} replace />
           )
         }
       />
       <Route
         path="/citizen"
         element={
-          user?.role === 'citizen' && user?.onboardingCompleted !== false ? (
+          canAccessRole('citizen') ? (
             <CitizenDashboard user={user} onLogout={logout} />
           ) : (
-            <Navigate to={user ? '/onboarding' : '/signin'} replace />
+            <Navigate to={guardRedirect()} replace />
           )
         }
       />
       <Route
         path="/politician"
         element={
-          user?.role === 'politician' && user?.onboardingCompleted !== false ? (
+          canAccessRole('politician') ? (
             <PoliticianDashboard user={user} onLogout={logout} />
           ) : (
-            <Navigate to={user ? '/onboarding' : '/signin'} replace />
+            <Navigate to={guardRedirect()} replace />
           )
         }
       />
@@ -81,10 +95,10 @@ function AppRoutes() {
       <Route
         path="/moderator"
         element={
-          user?.role === 'moderator' && user?.onboardingCompleted !== false ? (
+          canAccessRole('moderator') ? (
             <ModeratorDashboard user={user} onLogout={logout} />
           ) : (
-            <Navigate to={user ? '/onboarding' : '/signin'} replace />
+            <Navigate to={guardRedirect()} replace />
           )
         }
       />

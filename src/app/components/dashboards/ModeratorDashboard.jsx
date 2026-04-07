@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { DashboardLayout } from './DashboardLayout';
 import { Flag, CheckCircle, XCircle, Eye, AlertTriangle } from 'lucide-react';
+import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function ModeratorDashboard({ user, onLogout }) {
@@ -120,11 +121,14 @@ export function ModeratorDashboard({ user, onLogout }) {
       {activeTab === 'flagged' && (
         <div className="space-y-6">
           {loading && (
-            <div className="bg-white rounded-lg shadow p-6 text-sm text-gray-500">Loading moderation queue...</div>
+            <LoadingSkeleton lines={4} className="text-sm text-gray-500" />
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">{error}</div>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm flex items-center justify-between gap-3">
+              <span>{error}</span>
+              <button onClick={loadIssues} className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 text-red-800 font-semibold text-xs">Retry</button>
+            </div>
           )}
 
           {!loading && !error && moderationQueue.length === 0 && (

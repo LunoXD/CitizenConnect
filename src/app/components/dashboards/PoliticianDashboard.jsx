@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { DashboardLayout } from './DashboardLayout';
 import { AlertTriangle, MessageSquare, Send, Megaphone, TrendingUp, Users } from 'lucide-react';
 import { AnnouncementModal } from '../modals/AnnouncementModal';
+import { LoadingSkeleton } from '../common/LoadingSkeleton';
 import { api } from '../../lib/api';
 
 export function PoliticianDashboard({ user, onLogout }) {
@@ -16,6 +17,23 @@ export function PoliticianDashboard({ user, onLogout }) {
 
   const [issues, setIssues] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const [allIssues, allAnnouncements] = await Promise.all([
+        api.issues.all(),
+        api.announcements.all(),
+      ]);
+      setIssues(allIssues.map(formatIssue));
+      setAnnouncements(allAnnouncements.map(formatAnnouncement));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatIssue = (issue) => ({
     id: String(issue.id),
@@ -46,23 +64,6 @@ export function PoliticianDashboard({ user, onLogout }) {
   });
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const [allIssues, allAnnouncements] = await Promise.all([
-          api.issues.all(),
-          api.announcements.all(),
-        ]);
-        setIssues(allIssues.map(formatIssue));
-        setAnnouncements(allAnnouncements.map(formatAnnouncement));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadData();
   }, []);
 
@@ -150,8 +151,9 @@ export function PoliticianDashboard({ user, onLogout }) {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button onClick={loadData} className="px-3 py-1.5 rounded bg-red-100 hover:bg-red-200 text-red-800 font-semibold text-xs">Retry</button>
         </div>
       )}
 
@@ -201,7 +203,7 @@ export function PoliticianDashboard({ user, onLogout }) {
       {activeTab === 'issues' && (
         <div className="space-y-6">
           {loading && (
-            <div className="bg-white rounded-lg shadow p-6 text-gray-600">Loading citizen issues...</div>
+            <LoadingSkeleton lines={4} className="text-gray-600" />
           )}
           {!loading && issues.length === 0 && (
             <div className="bg-white rounded-lg shadow p-6 text-gray-600">No citizen issues available right now.</div>
@@ -302,7 +304,7 @@ export function PoliticianDashboard({ user, onLogout }) {
       {activeTab === 'announcements' && (
         <div className="space-y-6">
           {loading && (
-            <div className="bg-white rounded-lg shadow p-6 text-gray-600">Loading announcements...</div>
+            <LoadingSkeleton lines={4} className="text-gray-600" />
           )}
           {!loading && announcements.length === 0 && (
             <div className="bg-white rounded-lg shadow p-6 text-gray-600">No announcements published yet.</div>
